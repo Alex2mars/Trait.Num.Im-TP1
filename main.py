@@ -2,6 +2,7 @@ import cv2
 import argparse
 from os import listdir
 from os.path import isfile, join
+import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser()
 
@@ -18,5 +19,19 @@ if not isfile(reference_image_path):
 
 image_paths = [join(image_folder, f) for f in listdir(image_folder) if f != "Reference.JPG" and isfile(join(image_folder, f))]
 
-print(reference_image_path)
-print(image_paths)
+reference_image = cv2.imread(reference_image_path)
+images = [cv2.imread(f) for f in image_paths]
+
+def show_with_matplotlib(img, title="Image"):
+    """Shows an image using matplotlib capabilities"""
+
+    # Convert BGR image to RGB:
+    img_RGB = img[:, :, ::-1]
+
+    # Show the image using matplotlib:
+    plt.imshow(img_RGB)
+    plt.title(title)
+    plt.show()
+
+
+show_with_matplotlib(reference_image)
