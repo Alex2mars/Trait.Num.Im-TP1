@@ -4,6 +4,8 @@ from os import listdir
 from os.path import isfile, join
 import matplotlib.pyplot as plt
 
+from detect_changes import *
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument("folder_path", help="Path to the folder containing images to analyse")
@@ -34,4 +36,6 @@ def show_with_matplotlib(img, title="Image"):
     plt.show()
 
 
-show_with_matplotlib(reference_image)
+n = 1
+print(reference_image_path, image_paths[n])
+detect_changes(reference_image, images[n])
