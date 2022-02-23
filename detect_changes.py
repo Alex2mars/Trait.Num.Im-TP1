@@ -6,7 +6,7 @@ import numpy as np
 DEBUG = True
 FLOOR_RATIO = 0.3
 
-def detect_changes(ref_img_path, img_path):
+def detect_changes(ref_img_path, img_path, room, img_name):
     # Load reference image and image to analyse changes
     ref_img = cv2.imread(ref_img_path)
     new_img = cv2.imread(img_path)
@@ -113,11 +113,20 @@ def detect_changes(ref_img_path, img_path):
 
     # For each contour, we check if it is big enough (to avoid points), and display it on the image
     return_image = new_img.copy()
+    contour_objects = []
     for c in contours_final:
         area = cv2.contourArea(c)
         if area > 500:
+            contour_objects.append(c)
             x, y, w, h = cv2.boundingRect(c)
             cv2.rectangle(return_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+    # Print the current occupation
+    floor_area = cv2.contourArea(contour_floor)
+    object_area = sum((cv2.contourArea(cont) for cont in contour_objects))
+
+    occupation = object_area/floor_area
+    print(f"L'image {img_name} de la pièce {room} possède une occupation de : {round(occupation*100, 2)}% !")
 
     return return_image
 

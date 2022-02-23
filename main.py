@@ -36,7 +36,7 @@ for room_tuple in image_paths:
     room_image_paths.remove(ref_img_path)
 
     for room_image_path in room_image_paths:
-        img_with_detected_objects = detect_changes.detect_changes(ref_img_path, room_image_path)
+        img_with_detected_objects = detect_changes.detect_changes(ref_img_path, room_image_path, room, basename(room_image_path))
         cv2.imshow(f"{room} avec objets detectes - {basename(room_image_path)}", img_with_detected_objects)
 
         if detect_changes.DEBUG:
