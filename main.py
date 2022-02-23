@@ -1,41 +1,46 @@
 import cv2
 import argparse
 from os import listdir
-from os.path import isfile, join
-import matplotlib.pyplot as plt
+from os.path import basename
+from os.path import join
+import detect_changes
 
-from detect_changes import *
 
+def get_image_paths(image_folder):
+    all_image_path = list()
+    rooms = listdir(image_folder)
+    for room in rooms:
+        list_filename = listdir(f"{image_folder}\\{room}")
+        if not 'Reference.JPG' in list_filename:
+            print("Le dossier {} ne contient pas l'image de référence ! Elle doit être nommée Reference.JPG".format(room))
+            exit()
+        all_image_path.append((room, [join(f"{image_folder}\\{room}", filename) for filename in list_filename]))
+    return all_image_path
+
+
+# Argument parser
 parser = argparse.ArgumentParser()
-
-parser.add_argument("folder_path", help="Path to the folder containing images to analyse")
-
+parser.add_argument("images_path", help="Path to the folder containing folders of images to analyse")
 args = parser.parse_args()
 
-image_folder = args.folder_path
+# Get images and detect changes
+images_folder = args.images_path
 
-reference_image_path = join(image_folder, "Reference.JPG")
-if not isfile(reference_image_path):
-    print("Le dossier ne contient pas l'image de référence ! Elle doit être nommée Reference.JPG")
-    exit()
+image_paths = get_image_paths(images_folder)
 
-image_paths = [join(image_folder, f) for f in listdir(image_folder) if f != "Reference.JPG" and isfile(join(image_folder, f))]
+for room_tuple in image_paths:
+    room = room_tuple[0]
+    room_image_paths = room_tuple[1]
 
-reference_image = cv2.imread(reference_image_path)
-images = [cv2.imread(f) for f in image_paths]
+    ref_img_path = [image_path for image_path in room_image_paths if basename(image_path) == "Reference.JPG"][0]
+    room_image_paths.remove(ref_img_path)
 
-def show_with_matplotlib(img, title="Image"):
-    """Shows an image using matplotlib capabilities"""
+    for room_image_path in room_image_paths:
+        img_with_detected_objects = detect_changes.detect_changes(ref_img_path, room_image_path)
+        cv2.imshow(f"{room} avec objets detectes - {basename(room_image_path)}", img_with_detected_objects)
 
-    # Convert BGR image to RGB:
-    img_RGB = img[:, :, ::-1]
+        if detect_changes.DEBUG:
+            cv2.waitKey(0)
 
-    # Show the image using matplotlib:
-    plt.imshow(img_RGB)
-    plt.title(title)
-    plt.show()
-
-
-n = 1
-print(reference_image_path, image_paths[n])
-detect_changes(reference_image, images[n])
+cv2.waitKey(0)
+cv2.destroyAllWindows()
